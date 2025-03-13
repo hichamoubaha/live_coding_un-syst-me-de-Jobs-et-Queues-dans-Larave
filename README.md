@@ -1,66 +1,317 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Live_coding : **Comprendre et implémenter un système de Jobs et Queues dans Laravel pour une gestion asynchrone efficace.**
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# **Étape 1 : Installation de Laravel**
 
-## About Laravel
+Si tu n'as pas encore un projet Laravel, crée-en un en exécutant cette commande :
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+```bash
+composer create-project laravel/laravel live_coding
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Ensuite, entre dans le dossier du projet et ouvre le serveur :
 
-## Learning Laravel
+```bash
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+cd live_coding
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+php artisan serve
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```
 
-## Laravel Sponsors
+> 🛠️ Vérifie que Laravel fonctionne en allant sur http://127.0.0.1:8000.
+> 
+> 
+> Tu devrais voir la page d’accueil de Laravel.
+> 
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+---
 
-### Premium Partners
+# **📌 Étape 2 : Configuration de la Base de Données et des Queues**
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+### **1️⃣ Modifier `.env` pour configurer la base de données**
 
-## Contributing
+Dans le fichier `.env`, remplace ces lignes avec les bonnes informations :
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```
 
-## Code of Conduct
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=live_coding
+DB_USERNAME=postgres
+DB_PASSWORD=   # Mets ton mot de passe  ici
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```
 
-## Security Vulnerabilities
+> 🛠️ Vérifie que ta base de données existe dans phpMyAdmin ou avec MySQL Workbench. Si elle n'existe pas, crée-la :
+> 
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```sql
+CREATE DATABASE live_coding;
 
-## License
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### **2️⃣ Configurer le driver de Queue**
+
+Dans `.env`, mets :
+
+```
+QUEUE_CONNECTION=database
+
+```
+
+> 📌 Explication : Laravel gère les files d’attente avec plusieurs drivers (sync, database, redis...), ici on utilise database.
+> 
+
+### **3️⃣ Créer la table des Jobs**
+
+Laravel a une migration prête pour ça :
+
+```bash
+
+php artisan queue:table
+
+php artisan migrate
+
+```
+
+---
+
+# **📌 Étape 3 : Configuration de l’envoi d’email avec Mailtrap**
+
+### **1️⃣ Configurer Mailtrap**
+
+Crée un compte sur [Mailtrap](https://mailtrap.io/) et récupère tes identifiants SMTP.
+
+Dans `.env`, remplace ces lignes :
+
+```
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=ton_mailtrap_username
+MAIL_PASSWORD=ton_mailtrap_password
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS=hashim@gmail.com
+MAIL_FROM_NAME="live_coding"
+
+```
+
+> 📌 Explication : Mailtrap permet de tester l’envoi d’emails sans envoyer de vrais emails.
+> 
+
+---
+
+# **📌 Étape 4 : Créer un Mailable pour l'email de bienvenue**
+
+Un **Mailable** est une classe qui définit le contenu et l’envoi d’un email dans Laravel.
+
+### **1️⃣ Générer le Mailable**
+
+```bash
+php artisan make:mail WelcomeEmail
+
+```
+
+### **2️⃣ Modifier `app/Mail/WelcomeEmail.php`**
+
+```php
+<?php
+
+namespace App\Mail;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Mail\Mailable;
+use Illuminate\Queue\SerializesModels;
+
+class WelcomeEmail extends Mailable implements ShouldQueue
+{
+    use Queueable, SerializesModels;
+
+    public $user;
+
+    public function __construct($user)
+    {
+        $this->user = $user;
+    }
+
+    public function build()
+    {
+        return $this->subject('Bienvenue sur notre plateforme !')
+                    ->view('emails.welcome')
+                    ->with([
+                        'name' => $this->user->name,
+                    ]);
+    }
+}
+
+```
+
+### **3️⃣ Créer la vue de l’email**
+
+```bash
+
+mkdir -p resources/views/emails
+touch resources/views/emails/welcome.blade.php
+
+```
+
+Ajoute ce contenu dans `resources/views/emails/welcome.blade.php` :
+
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenue</title>
+</head>
+<body>
+    <h1>Bienvenue, {{ $name }} !</h1>
+    <p>Nous sommes ravis de vous compter parmi nous.</p>
+</body>
+</html>
+
+```
+
+---
+
+# **📌 Étape 5 : Créer un Job pour envoyer l’email**
+
+### **1️⃣ Générer le Job**
+
+```bash
+php artisan make:job SendWelcomeEmail
+
+```
+
+### **2️⃣ Modifier `app/Jobs/SendWelcomeEmail.php`**
+
+```php
+<?php
+
+namespace App\Jobs;
+
+use App\Mail\WelcomeEmail;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Mail;
+
+class SendWelcomeEmail implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected $user;
+
+    public function __construct($user)
+    {
+        $this->user = $user;
+    }
+
+    public function handle()
+    {
+        Mail::to($this->user->email)->send(new WelcomeEmail($this->user));
+    }
+}
+
+```
+
+---
+
+# **📌 Étape 6 : Créer une API pour déclencher le Job**
+
+### **1️⃣ Créer le contrôleur**
+
+```bash
+
+php artisan make:controller UserController
+
+```
+
+### **2️⃣ Modifier `app/Http/Controllers/UserController.php`**
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Jobs\SendWelcomeEmail;
+use Illuminate\Http\Request;
+
+class UserController extends Controller
+{
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+        ]);
+
+        $user = (object) [
+            'name' => $request->name,
+            'email' => $request->email,
+        ];
+
+        // Déclencher le Job
+        SendWelcomeEmail::dispatch($user);
+
+        return response()->json(['message' => 'Utilisateur enregistré, email en cours d’envoi.']);
+    }
+}
+
+```
+
+### **3️⃣ Ajouter la route dans `routes/api.php`**
+
+```php
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Route;
+
+Route::post('/register', [UserController::class, 'register']);
+
+```
+
+---
+
+# **📌 Étape 7 : Exécuter les Workers et Tester avec Postman**
+
+### **1️⃣ Lancer le Worker**
+
+Dans un premier terminal, lance :
+
+```bash
+php artisan queue:work
+
+```
+
+### **2️⃣ Tester avec Postman**
+
+- **Méthode :** `POST`
+- **URL :** `http://127.0.0.1:8000/api/register`
+- **Body (JSON) :**
+    
+    ```json
+    {
+      "name": "hicham",
+      "email": "hicham@gmail.com"
+    }
+    
+    ```
+    
+- **Résultat attendu :**
+    
+    ```json
+    
+    {
+      "message": "Utilisateur enregistré, email en cours d’envoi."
+    }
+    
+    ```
+    
+- **Vérifie sur Mailtrap** si l’email a bien été envoyé. 🎉
